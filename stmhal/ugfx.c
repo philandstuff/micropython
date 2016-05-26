@@ -42,6 +42,8 @@
 #include "genhdr/pins.h"
 #include "bufhelper.h"
 
+#include "ugfx_logo_banner.h"
+
 /// \moduleref pyb
 /// \class UGFX - uGFX based driver for LCDs
 ///
@@ -474,6 +476,90 @@ STATIC mp_obj_t pyb_ugfx_ball_demo(mp_obj_t self_in) {
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(pyb_ugfx_ball_demo_obj, pyb_ugfx_ball_demo);
 
 
+int fseek ( FILE * stream, long int offset, int origin ) {
+  return (0);
+}
+
+size_t fwrite ( const void * ptr, size_t size, size_t count, FILE * stream ) {
+	return (0);	
+}
+
+size_t fread ( void * ptr, size_t size, size_t count, FILE * stream ) {
+	return 0;
+}
+
+int fclose ( FILE * stream ) {
+	return 0;
+}
+
+int remove ( const char * filename ){
+	return 1; //some error, cant remove
+}
+
+FILE * fopen ( const char * filename, const char * mode ) {
+	return 0;	
+}
+
+int fstat(int fildes, struct stat *buf) {
+	return 0;
+}
+
+int fileno(FILE *stream){
+	return 0;
+}
+
+int rename(const char *old, const char *new){
+	return 0;
+}
+
+int access(const char *path, int amode){
+	return 0;
+}
+
+int stat(const char *restrict path, struct stat *restrict buf) {
+	return 0;
+}
+
+#define errno (*__errno())
+extern int *__errno ( void );
+static struct _reent impure_data = { 0, 0};// "", 0, "C", ... };
+struct _reent * _impure_ptr = &impure_data;
+int * __errno (){
+  return &_impure_ptr->_errno;
+
+}
+
+
+
+/// \method image_demo()
+///
+/// IMAGE DEMO!!!
+///
+STATIC mp_obj_t pyb_ugfx_image_demo(mp_obj_t self_in) {
+    // extract arguments
+    //pyb_ugfx_obj_t *self = args[0];
+	
+	gdispImage myImage; 
+	
+	coord_t	swidth, sheight;
+ 
+ 
+	// Get the display dimensions
+	swidth = gdispGetWidth();
+	sheight = gdispGetHeight();
+ 
+	// Set up IO for our image
+	gdispImageOpenFile(&myImage, "ugfx_logo_banner.bmp");
+	gdispImageDraw(&myImage, 0, 0, swidth, sheight, 0, 0);
+	gdispImageClose(&myImage);
+ 
+ 
+
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(pyb_ugfx_image_demo_obj, pyb_ugfx_image_demo);
+
+
 
 /// \method set_orientation(a)
 ///
@@ -555,6 +641,7 @@ STATIC const mp_map_elem_t pyb_ugfx_locals_dict_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_get_width), (mp_obj_t)&pyb_ugfx_get_width_obj },
     { MP_OBJ_NEW_QSTR(MP_QSTR_get_height), (mp_obj_t)&pyb_ugfx_get_height_obj },
     { MP_OBJ_NEW_QSTR(MP_QSTR_ball_demo), (mp_obj_t)&pyb_ugfx_ball_demo_obj },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_image_demo), (mp_obj_t)&pyb_ugfx_image_demo_obj },
     { MP_OBJ_NEW_QSTR(MP_QSTR_get_pixel), (mp_obj_t)&pyb_ugfx_get_pixel_obj },
 	
 	//class constants
