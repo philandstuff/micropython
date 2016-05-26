@@ -39,6 +39,8 @@
 #include "ugfx.h"
 #include "gfx.h"
 
+#include "extmod/vfs_fat_file.h"
+
 #include "genhdr/pins.h"
 #include "bufhelper.h"
 
@@ -485,7 +487,12 @@ size_t fwrite ( const void * ptr, size_t size, size_t count, FILE * stream ) {
 }
 
 size_t fread ( void * ptr, size_t size, size_t count, FILE * stream ) {
-	return 0;
+	
+    mp_obj_t readinto_fn = mp_load_attr(stream, MP_QSTR_read);
+    mp_obj_t bytearray = mp_obj_new_bytearray_by_ref(size, ptr);
+    mp_obj_t bytes_read = mp_call_function_1(readinto_fn, bytearray);
+	
+	return mp_obj_get_int(bytes_read);
 }
 
 int fclose ( FILE * stream ) {
@@ -497,7 +504,12 @@ int remove ( const char * filename ){
 }
 
 FILE * fopen ( const char * filename, const char * mode ) {
-	return 0;	
+
+    mp_obj_t filename_obj = mp_obj_new_str(filename, strlen(filename), false);
+    mp_obj_t mode_obj = mp_obj_new_str(mode, strlen(mode), true);
+    mp_obj_t args[2] = { filename_obj, mode_obj };
+    mp_obj_t file = fatfs_builtin_open(2, args, (mp_map_t *)&mp_const_empty_map);
+	return (FILE * )MP_OBJ_TO_PTR(file);	
 }
 
 int fstat(int fildes, struct stat *buf) {
