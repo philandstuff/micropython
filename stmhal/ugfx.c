@@ -477,9 +477,18 @@ STATIC mp_obj_t pyb_ugfx_ball_demo(mp_obj_t self_in) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(pyb_ugfx_ball_demo_obj, pyb_ugfx_ball_demo);
 
-
+/*
 int fseek ( FILE * stream, long int offset, int origin ) {
-  return (0);
+	
+	
+	mp_obj_t fseek_fn = mp_load_attr(stream, MP_QSTR_seek);
+	mp_obj_t offset_mp = mp_obj_new_int(offset);
+	mp_obj_t origin_mp = mp_obj_new_int(origin);
+	
+	mp_obj_t res = mp_call_function_2(fseek_fn, offset_mp, origin_mp)
+	return mp_obj_get_int(res);
+	
+
 }
 
 size_t fwrite ( const void * ptr, size_t size, size_t count, FILE * stream ) {
@@ -488,9 +497,9 @@ size_t fwrite ( const void * ptr, size_t size, size_t count, FILE * stream ) {
 
 size_t fread ( void * ptr, size_t size, size_t count, FILE * stream ) {
 	
-    mp_obj_t readinto_fn = mp_load_attr(stream, MP_QSTR_read);
+    mp_obj_t read_fn = mp_load_attr(stream, MP_QSTR_read);
     mp_obj_t bytearray = mp_obj_new_bytearray_by_ref(size, ptr);
-    mp_obj_t bytes_read = mp_call_function_1(readinto_fn, bytearray);
+    mp_obj_t bytes_read = mp_call_function_1(read_fn, bytearray);
 	
 	return mp_obj_get_int(bytes_read);
 }
@@ -520,6 +529,12 @@ int fileno(FILE *stream){
 	return 0;
 }
 
+//surely we need this, but its defined somewhere else?!
+//int feof(FILE *stream){
+//	return 0;
+//}
+
+
 int rename(const char *old, const char *new){
 	return 0;
 }
@@ -541,35 +556,67 @@ int * __errno (){
 
 }
 
+*/
 
-
-/// \method image_demo()
+/// \method display_image(file_name)
 ///
-/// IMAGE DEMO!!!
-///
-STATIC mp_obj_t pyb_ugfx_image_demo(mp_obj_t self_in) {
+STATIC mp_obj_t pyb_ugfx_display_image(mp_obj_t self_in, mp_obj_t str) {
     // extract arguments
     //pyb_ugfx_obj_t *self = args[0];
+	mp_uint_t len;
+	const char *file = mp_obj_str_get_data(str, &len);
 	
-	gdispImage myImage; 
-	
+	gdispImage myImage; 	
 	coord_t	swidth, sheight;
- 
- 
+  
 	// Get the display dimensions
 	swidth = gdispGetWidth();
 	sheight = gdispGetHeight();
  
 	// Set up IO for our image
-	gdispImageOpenFile(&myImage, "ugfx_logo_banner.bmp");
+	gdispImageOpenFile(&myImage, file);
 	gdispImageDraw(&myImage, 0, 0, swidth, sheight, 0, 0);
 	gdispImageClose(&myImage);
- 
  
 
     return mp_const_none;
 }
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(pyb_ugfx_image_demo_obj, pyb_ugfx_image_demo);
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(pyb_ugfx_display_image_obj, pyb_ugfx_display_image);
+
+/// \method display_image(file_name)
+///
+STATIC mp_obj_t pyb_ugfx_play_gif(mp_obj_t self_in, mp_obj_t str, mp_obj_t loops_) {
+    // extract arguments
+    //pyb_ugfx_obj_t *self = args[0];
+	mp_uint_t len;
+	const char *file = mp_obj_str_get_data(str, &len);
+	int loops = mp_obj_get_int(loops_);
+	
+	gdispImage myImage; 	
+	coord_t	swidth, sheight;
+  
+	// Get the display dimensions
+	swidth = gdispGetWidth();
+	sheight = gdispGetHeight();
+ 
+	// Set up IO for our image
+	gdispImageOpenFile(&myImage, file);
+	gdispImageDraw(&myImage, 0, 0, swidth, sheight, 0, 0);
+	
+	while(loops--){	
+		gdispImageDraw(&myImage, 0, 0, myImage.width, myImage.height, 0, 0);
+		gdispImageNext(&myImage);
+	 
+		
+		HAL_Delay(500);
+	}
+	
+	gdispImageClose(&myImage);
+ 
+
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(pyb_ugfx_play_gif_obj, pyb_ugfx_play_gif);
 
 
 
@@ -653,9 +700,10 @@ STATIC const mp_map_elem_t pyb_ugfx_locals_dict_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_get_width), (mp_obj_t)&pyb_ugfx_get_width_obj },
     { MP_OBJ_NEW_QSTR(MP_QSTR_get_height), (mp_obj_t)&pyb_ugfx_get_height_obj },
     { MP_OBJ_NEW_QSTR(MP_QSTR_ball_demo), (mp_obj_t)&pyb_ugfx_ball_demo_obj },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_image_demo), (mp_obj_t)&pyb_ugfx_image_demo_obj },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_display_image), (mp_obj_t)&pyb_ugfx_display_image_obj },
     { MP_OBJ_NEW_QSTR(MP_QSTR_get_pixel), (mp_obj_t)&pyb_ugfx_get_pixel_obj },
-	
+    { MP_OBJ_NEW_QSTR(MP_QSTR_play_gif), (mp_obj_t)&pyb_ugfx_play_gif_obj },
+
 	//class constants
     { MP_OBJ_NEW_QSTR(MP_QSTR_RED),        MP_OBJ_NEW_SMALL_INT(Red) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BLUE),       MP_OBJ_NEW_SMALL_INT(Blue) },
@@ -663,6 +711,7 @@ STATIC const mp_map_elem_t pyb_ugfx_locals_dict_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_BLACK),      MP_OBJ_NEW_SMALL_INT(Black) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_WHITE),      MP_OBJ_NEW_SMALL_INT(White) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_YELLOW),     MP_OBJ_NEW_SMALL_INT(Yellow) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_ORANGE),     MP_OBJ_NEW_SMALL_INT(Orange) },
 
 };
 
