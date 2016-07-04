@@ -23,6 +23,7 @@ SPI_HandleTypeDef ili_spi;
 #define  FMC_BCR1_WFDIS                     ((uint32_t)0x00200000)        /*!<Write FIFO Disable         */
 
 #define LCD_RAM (*((volatile uint8_t *)(FMC_BASE_ADDR + (1<<FMC_ADDR_PIN))))
+#define LCD_RAM_16 (*((volatile uint16_t *)(FMC_BASE_ADDR + (1<<FMC_ADDR_PIN))))
 #define LCD_REG (*((volatile uint8_t *)(FMC_BASE_ADDR)))
 
 static void HAL_FMC_MspInit(void){
@@ -272,9 +273,18 @@ static GFXINLINE void write_data(GDisplay *g, uint8_t data) {
 	(void) g;
 	LCD_RAM = data;
 }
+static GFXINLINE void write_data16(GDisplay *g, uint16_t data) {
+	(void) g;
+	LCD_RAM_16 = data;
+}
 static GFXINLINE uint8_t read_data(GDisplay *g) {
 	(void) g;
 	uint8_t d = LCD_RAM;
+	return d;
+}
+static GFXINLINE uint16_t read_data16(GDisplay *g) {
+	(void) g;
+	uint16_t d = LCD_RAM_16;
 	return d;
 }
 #else
