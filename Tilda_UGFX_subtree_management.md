@@ -16,7 +16,12 @@ git commit -m "..."
 
 # How to update the subtree
 ```bash
-git fetch ugfx
+git fetch ugfx master
 git merge -s subtree --squash ugfx/master
 git commit -m "Update UGFX subtree to ..."
 ```
+
+# Nuclear option of updating: Remove and add again
+```
+git fetch ugfx master
+git rm -rf extmod/ugfx
