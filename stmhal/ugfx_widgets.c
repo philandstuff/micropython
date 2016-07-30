@@ -701,7 +701,7 @@ STATIC const mp_arg_t ugfx_keyboard_make_new_args[] = {
     { MP_QSTR_down, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = GINPUT_TOGGLE_DOWN} },
     { MP_QSTR_right, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = GINPUT_TOGGLE_RIGHT} },
     { MP_QSTR_left, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = GINPUT_TOGGLE_LEFT} },
-    { MP_QSTR_select, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = GINPUT_TOGGLE_CENTER} },
+    { MP_QSTR_select, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = GINPUT_TOGGLE_A} },
 	{ MP_QSTR_style, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
 };
 #define UGFX_KEYBOARD_MAKE_NEW_NUM_ARGS MP_ARRAY_SIZE(ugfx_keyboard_make_new_args)
@@ -750,8 +750,8 @@ STATIC mp_obj_t ugfx_keyboard_make_new(const mp_obj_type_t *type, mp_uint_t n_ar
 
     gwinAttachToggle(kbd->ghKeyboard, 0, vals[5].u_int);
     gwinAttachToggle(kbd->ghKeyboard, 1, vals[6].u_int);
-    gwinAttachToggle(kbd->ghKeyboard, 2, vals[7].u_int);
-    gwinAttachToggle(kbd->ghKeyboard, 3, vals[8].u_int);
+    gwinAttachToggle(kbd->ghKeyboard, 3, vals[7].u_int);
+    gwinAttachToggle(kbd->ghKeyboard, 2, vals[8].u_int);
     gwinAttachToggle(kbd->ghKeyboard, 4, vals[9].u_int);
 
 	return kbd;
@@ -1196,6 +1196,136 @@ const mp_obj_type_t ugfx_label_type = {
 };
 
 
+
+/////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
+////////////////       CONSOLE      /////////////////
+/////////////////////////////////////////////////////
+/////////////////////////////////////////////////////
+
+
+typedef struct _ugfx_console_t {
+    mp_obj_base_t base;	
+	justify_t justification;
+	GHandle ghConsole;
+} ugfx_console_obj_t;
+
+
+
+/// \classmethod \constructor(x, y, a, b, text, parent=None)
+///
+/// Construct an console object.
+/// If the style input is not set, will take the style from the parent, if the parents style is set. Otherwise uses default style
+STATIC const mp_arg_t ugfx_console_make_new_args[] = {
+    { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+    { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+    { MP_QSTR_a, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+    { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT, {.u_int = 0} },
+//    { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+    { MP_QSTR_parent, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+	{ MP_QSTR_style, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL} },
+//	{ MP_QSTR_justification, MP_ARG_KW_ONLY | MP_ARG_INT, {.u_int = 0} },
+};
+#define UGFX_LABEL_MAKE_NEW_NUM_ARGS MP_ARRAY_SIZE(ugfx_console_make_new_args)
+
+STATIC mp_obj_t ugfx_console_make_new(const mp_obj_type_t *type, mp_uint_t n_args, mp_uint_t n_kw, const mp_obj_t *args) {
+    // check arguments
+    mp_arg_val_t vals[UGFX_LABEL_MAKE_NEW_NUM_ARGS];
+    mp_arg_parse_all_kw_array(n_args, n_kw, args, UGFX_LABEL_MAKE_NEW_NUM_ARGS, ugfx_console_make_new_args, vals);
+
+    // create console object
+    ugfx_console_obj_t *btn = m_new_obj(ugfx_console_obj_t);
+    btn->base.type = &ugfx_console_type;
+
+
+	//setup console options
+	GWidgetInit	wi;
+
+	// Apply some default values for GWIN
+	gwinWidgetClearInit(&wi);
+	wi.g.show = TRUE;
+
+	// Apply the console parameters
+	wi.g.width = vals[2].u_int;
+    wi.g.height = vals[3].u_int;
+    wi.g.y = vals[1].u_int;
+    wi.g.x = vals[0].u_int;
+
+	// Apply parent
+    wi.g.parent = NULL;
+    if (MP_OBJ_IS_TYPE(vals[4].u_obj, &ugfx_container_type)) {
+        ugfx_container_obj_t *container = vals[4].u_obj;
+        wi.g.parent = container->ghContainer;
+        wi.customStyle = container->style;
+    }
+	
+	// Apply style
+    if (MP_OBJ_IS_TYPE(vals[5].u_obj, &ugfx_style_type)) {
+        ugfx_style_obj_t *sty = vals[5].u_obj;
+        wi.customStyle = &(sty->style);
+    }
+
+
+	// Create the actual console
+	btn->ghConsole = gwinConsoleCreate(NULL, &wi);
+
+	////text
+	//gwinSetText(btn->ghConsole,mp_obj_str_get_str(vals[4].u_obj),TRUE);
+
+	return btn;
+}
+
+/// \method write()
+///
+/// frees up all resources
+STATIC mp_obj_t ugfx_console_write(mp_obj_t self_in, mp_obj_t text) {
+    ugfx_console_obj_t *self = self_in;
+	const char *s = mp_obj_str_get_str(text);
+
+	gwinPrintf(self->ghConsole, s);
+
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(ugfx_console_write_obj, ugfx_console_write);
+
+
+/// \method destroy()
+///
+/// frees up all resources
+STATIC mp_obj_t ugfx_console_destroy(mp_obj_t self_in) {
+    ugfx_console_obj_t *self = self_in;
+
+	gwinDestroy(self->ghConsole);
+
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(ugfx_console_destroy_obj, ugfx_console_destroy);
+
+
+STATIC const mp_map_elem_t ugfx_console_locals_dict_table[] = {
+    // instance methods
+    { MP_OBJ_NEW_QSTR(MP_QSTR_destroy), (mp_obj_t)&ugfx_console_destroy_obj},
+    { MP_OBJ_NEW_QSTR(MP_QSTR_visible), (mp_obj_t)&ugfx_widget_visible_obj},
+    { MP_OBJ_NEW_QSTR(MP_QSTR___del__), (mp_obj_t)&ugfx_console_destroy_obj},
+    { MP_OBJ_NEW_QSTR(MP_QSTR_write), (mp_obj_t)&ugfx_console_write_obj},
+//    { MP_OBJ_NEW_QSTR(MP_QSTR_text), (mp_obj_t)&ugfx_widget_text_obj },
+
+
+
+};
+
+STATIC MP_DEFINE_CONST_DICT(ugfx_console_locals_dict, ugfx_console_locals_dict_table);
+
+const mp_obj_type_t ugfx_console_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_Console,
+    .make_new = ugfx_console_make_new,
+    .locals_dict = (mp_obj_t)&ugfx_console_locals_dict,
+};
+
+
+
+
 /// \class image - provides a wrapper for uGFX images
 ///
 /// This class is used to hold a uGFX image handle, and can also be
@@ -1441,6 +1571,8 @@ static GHandle get_ugfx_handle(mp_obj_t in){
 		return ((ugfx_keyboard_obj_t *)in)->ghKeyboard;
 	else if (MP_OBJ_IS_TYPE(in,&ugfx_label_type))
 		return ((ugfx_label_obj_t *)in)->ghLabel;
+	else if (MP_OBJ_IS_TYPE(in,&ugfx_console_type))
+		return ((ugfx_console_obj_t *)in)->ghConsole;
 	//else if (MP_OBJ_IS_TYPE(in,&ugfx_label_type))
 	//	return ((ugfx_container_obj_t *)in)->ghContainer;
 	return 0;

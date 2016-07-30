@@ -1054,6 +1054,7 @@ STATIC const mp_map_elem_t ugfx_module_dict_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_Image), (mp_obj_t)&ugfx_image_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Checkbox), (mp_obj_t)&ugfx_checkbox_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Imagebox), (mp_obj_t)&ugfx_imagebox_type },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_Console), (mp_obj_t)&ugfx_console_type },
 
 
 };

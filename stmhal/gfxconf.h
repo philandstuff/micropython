@@ -182,10 +182,10 @@
 //    #define GWIN_NEED_FLASHING                       FALSE
 //        #define GWIN_FLASHING_PERIOD                 250
 
-//#define GWIN_NEED_CONSOLE                            TRUE
-//    #define GWIN_CONSOLE_USE_HISTORY                 FALSE
+#define GWIN_NEED_CONSOLE                            TRUE
+    #define GWIN_CONSOLE_USE_HISTORY                 TRUE
 //        #define GWIN_CONSOLE_HISTORY_AVERAGING       FALSE
-//        #define GWIN_CONSOLE_HISTORY_ATCREATE        FALSE
+        #define GWIN_CONSOLE_HISTORY_ATCREATE        TRUE
 //    #define GWIN_CONSOLE_ESCSEQ                      FALSE
 //    #define GWIN_CONSOLE_USE_BASESTREAM              FALSE
 //    #define GWIN_CONSOLE_USE_FLOAT                   FALSE

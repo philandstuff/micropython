@@ -32,6 +32,7 @@ extern const mp_obj_type_t ugfx_keyboard_type;
 extern const mp_obj_type_t ugfx_label_type;
 extern const mp_obj_type_t ugfx_image_type;
 extern const mp_obj_type_t ugfx_imagebox_type;
+extern const mp_obj_type_t ugfx_console_type;
 
 void print_image_error(gdispImageError err);
 
