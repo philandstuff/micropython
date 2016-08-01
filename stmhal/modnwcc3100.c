@@ -352,8 +352,8 @@ STATIC mp_obj_t cc3100_connect(mp_uint_t n_args, const mp_obj_t *pos_args, mp_ma
     const char *user = NULL;
     SlSecParamsExt_t sec_params_ext;
     SlSecParamsExt_t *sec_params_ext_ptr = NULL;
-    if (args[4].u_obj != mp_const_none) {
-        user = mp_obj_str_get_data(args[4].u_obj, &user_len);
+    if (args[5].u_obj != mp_const_none) {
+        user = mp_obj_str_get_data(args[5].u_obj, &user_len);
         sec = SL_SEC_TYPE_WPA_ENT; // override security type
 
         sec_params_ext_ptr = &sec_params_ext;
@@ -363,7 +363,7 @@ STATIC mp_obj_t cc3100_connect(mp_uint_t n_args, const mp_obj_t *pos_args, mp_ma
         sec_params_ext.EapMethod = SL_ENT_EAP_METHOD_PEAP1_MSCHAPv2;
 
         // 0 - Disable the server authnetication | 1 - Enable (this is the deafult)
-        uint8_t serverAuth = 0; 
+        uint8_t serverAuth = 1;
         sl_WlanSet(SL_WLAN_CFG_GENERAL_PARAM_ID, 19, 1, (uint8_t *)&serverAuth);
     }
 
