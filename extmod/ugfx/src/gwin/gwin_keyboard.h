@@ -121,6 +121,9 @@ GSourceHandle gwinKeyboardGetEventSource(GHandle gh);
  */
 void gwinKeyboardSetLayout(GHandle gh, const struct GVKeyTable *layout);
 
+// DOCUMENT ME!!!!
+void gwinKeyboardSetSubLayout(GHandle gh, int sublayout);
+
 /**
  * @brief   Get the selected key when using toggle
  *

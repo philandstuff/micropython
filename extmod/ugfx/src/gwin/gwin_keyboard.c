@@ -552,8 +552,17 @@ GSourceHandle gwinKeyboardGetEventSource(GHandle gh) {
 	return (GSourceHandle)gh;
 }
 
+#define gk		((GKeyboardObject *)gh)
+void gwinKeyboardSetSubLayout(GHandle gh, int sublayout) {
+	gk->keyset = gk->keytable->ksets[sublayout];
+	gk->w.g.flags &= ~(GKEYBOARD_FLG_QUICKUPDATE|GKEYBOARD_FLG_REVERTSET);
+
+	// Update the display
+	_gwinUpdate(gh);
+}
+
 void gwinKeyboardSetLayout(GHandle gh, const struct GVKeyTable *layout) {
-	#define gk		((GKeyboardObject *)gh)
+	
 
 	if (gh->vmt != (gwinVMT *)&keyboardVMT)
 		return;
@@ -564,9 +573,9 @@ void gwinKeyboardSetLayout(GHandle gh, const struct GVKeyTable *layout) {
 	gk->keyset = gk->keytable->ksets[0];
 	gk->lastkeyrow = gk->lastkeycol = gk->keyrow = gk->keycol = GKEY_BAD_ROWCOL;
 	gk->w.g.flags &= ~(GKEYBOARD_FLG_QUICKUPDATE|GKEYBOARD_FLG_REVERTSET);
-	gwinRedraw(gh);
-	#undef gk
+	gwinRedraw(gh);	
 }
+#undef gk
 
 /*----------------------------------------------------------
  * Custom Draw Routines
