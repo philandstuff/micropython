@@ -870,6 +870,20 @@ STATIC mp_obj_t ugfx_keyboard_destroy(mp_obj_t self_in) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(ugfx_keyboard_destroy_obj, ugfx_keyboard_destroy);
 
+
+/// \method destroy()
+///
+/// frees up all resources
+STATIC mp_obj_t ugfx_keyboard_sublayout(mp_obj_t self_in, mp_obj_t layout) {
+    ugfx_keyboard_obj_t *self = self_in;
+
+	gwinKeyboardSetLayout(self->ghKeyboard, mp_obj_get_int(layout));
+
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(ugfx_keyboard_sublayout_obj, ugfx_keyboard_sublayout);
+
+
 /*
 /// \method callback(fun)
 /// Set the function to be called when a key is pressed.
@@ -910,6 +924,7 @@ STATIC const mp_map_elem_t ugfx_keyboard_locals_dict_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_text), (mp_obj_t)&ugfx_widget_text_obj },
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_style), (mp_obj_t)&ugfx_widget_style_obj },
 	{ MP_OBJ_NEW_QSTR(MP_QSTR_enabled), (mp_obj_t)&ugfx_widget_enabled_obj },
+	{ MP_OBJ_NEW_QSTR(MP_QSTR_sublayout), (mp_obj_t)&ugfx_keyboard_sublayout_obj },
 
 //	{ MP_OBJ_NEW_QSTR(MP_QSTR_set_keyboard_callback), (mp_obj_t)&ugfx_set_keyboard_callback_obj },
 //    { MP_OBJ_NEW_QSTR(MP_QSTR_clear_keyboard_callback), (mp_obj_t)&ugfx_clear_keyboard_callback_obj },
