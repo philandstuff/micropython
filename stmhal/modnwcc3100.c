@@ -360,10 +360,10 @@ STATIC mp_obj_t cc3100_connect(mp_uint_t n_args, const mp_obj_t *pos_args, mp_ma
         sec_params_ext.User = (int8_t*)user;
         sec_params_ext.UserLen = user_len;
         sec_params_ext.AnonUserLen = 0;
-        sec_params_ext.EapMethod = SL_ENT_EAP_METHOD_PEAP1_MSCHAPv2;
+        sec_params_ext.EapMethod = SL_ENT_EAP_METHOD_TTLS_MSCHAPv2;
 
         // 0 - Disable the server authnetication | 1 - Enable (this is the deafult)
-        uint8_t serverAuth = 1;
+        uint8_t serverAuth = 0;
         sl_WlanSet(SL_WLAN_CFG_GENERAL_PARAM_ID, 19, 1, (uint8_t *)&serverAuth);
     }
 
