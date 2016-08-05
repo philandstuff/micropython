@@ -987,7 +987,7 @@ STATIC mp_uint_t cc3100_socket_send(mod_network_socket_obj_t *socket, const byte
         int n = MIN((len - bytes), MAX_TX_PACKET);
         n = sl_Send(socket->u_state, (uint8_t*)buf + bytes, n, 0);
         if (n <= 0) {
-            *_errno = -1; //TODO find correct error
+            *_errno = n;
             return -1;
         }
         bytes += n;
@@ -1020,7 +1020,7 @@ STATIC mp_uint_t cc3100_socket_recv(mod_network_socket_obj_t *socket, byte *buf,
     // do the recv
     int ret = sl_Recv(socket->u_state, buf, len, 0);
     if (ret < 0) {
-        *_errno = -1; //TODO find correct error
+        *_errno = ret;
         return -1;
     }
 
@@ -1031,7 +1031,7 @@ STATIC mp_uint_t cc3100_socket_sendto(mod_network_socket_obj_t *socket, const by
     MAKE_SOCKADDR(addr, ip, port)
     int ret = sl_SendTo(socket->u_state, (byte*)buf, len, 0, (SlSockAddr_t*)&addr, sizeof(addr));
     if (ret < 0) {
-        *_errno = -1; //TODO find correct error
+        *_errno = ret;
         return -1;
     }
     return ret;
@@ -1042,7 +1042,7 @@ STATIC mp_uint_t cc3100_socket_recvfrom(mod_network_socket_obj_t *socket, byte *
     SlSocklen_t addr_len = sizeof(addr);
     mp_int_t ret = sl_RecvFrom(socket->u_state, buf, len, 0, &addr, &addr_len);
     if (ret < 0) {
-        *_errno = -1; //TODO find correct error
+        *_errno = ret;
         return -1;
     }
     UNPACK_SOCKADDR(addr, ip, *port);
@@ -1092,7 +1092,7 @@ STATIC int cc3100_socket_settimeout(mod_network_socket_obj_t *socket, mp_uint_t 
     }
 
     if (ret != 0) {
-        *_errno = -1; //TODO find correct error
+        *_errno = ret;
         return -1;
     }
 
@@ -1136,8 +1136,8 @@ STATIC int cc3100_socket_ioctl(mod_network_socket_obj_t *socket, mp_uint_t reque
         int nfds = sl_Select(fd + 1, &rfds, &wfds, &xfds, &tv);
 
         // check for error
-        if (nfds == -1) {
-            *_errno = -1;
+        if (nfds <0 ) {
+            *_errno = nfds;
             return -1;
         }
 
